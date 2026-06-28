@@ -8,7 +8,7 @@ COPY package.json package-lock.json ./
 RUN npm install --ignore-scripts
 
 COPY . .
-ENV DATABASE_URL=file:./prisma/dev.db
+ENV DATABASE_URL=file:./dev.db
 RUN npm run postinstall
 RUN npx prisma db push && npm run seed
 RUN npm run build
