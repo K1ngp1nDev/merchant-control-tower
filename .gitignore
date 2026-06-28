@@ -1,0 +1,21 @@
+# Nuxt
+.nuxt
+.output
+.nitro
+.cache
+dist
+
+# Node
+node_modules
+*.log
+
+# Env & DB
+.env
+*.db
+*.db-journal
+
+# Prisma generated client
+/prisma/generated
+
+# OS
+.DS_Store

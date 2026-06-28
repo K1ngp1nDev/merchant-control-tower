@@ -1,0 +1,74 @@
+<script setup lang="ts">
+const props = defineProps<{ open: boolean; title?: string; subtitle?: string }>()
+const emit = defineEmits<{ close: [] }>()
+
+function onKey(e: KeyboardEvent) {
+  if (e.key === 'Escape') emit('close')
+}
+watch(
+  () => props.open,
+  (v) => {
+    if (import.meta.client) document.body.style.overflow = v ? 'hidden' : ''
+  },
+)
+onMounted(() => window.addEventListener('keydown', onKey))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKey)
+  if (import.meta.client) document.body.style.overflow = ''
+})
+</script>
+
+<template>
+  <Teleport to="body">
+    <Transition name="fade">
+      <div
+        v-if="open"
+        class="fixed inset-0 z-40 flex items-end justify-center bg-slate-900/50 p-0 backdrop-blur-sm sm:items-center sm:p-4"
+        @click.self="emit('close')"
+      >
+        <Transition name="pop">
+          <div
+            v-if="open"
+            class="card flex max-h-[90vh] w-full flex-col overflow-hidden rounded-b-none sm:max-w-lg sm:rounded-2xl"
+            role="dialog"
+            aria-modal="true"
+          >
+            <header class="flex items-start justify-between gap-3 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+              <div class="min-w-0">
+                <h2 class="truncate text-base font-semibold">{{ title }}</h2>
+                <p v-if="subtitle" class="truncate text-xs text-slate-400">{{ subtitle }}</p>
+              </div>
+              <button class="btn btn-ghost !px-2 !py-1 text-lg leading-none" aria-label="Close" @click="emit('close')">✕</button>
+            </header>
+            <div class="flex-1 overflow-y-auto p-5">
+              <slot />
+            </div>
+            <footer v-if="$slots.footer" class="border-t border-slate-200 p-4 dark:border-slate-800">
+              <slot name="footer" />
+            </footer>
+          </div>
+        </Transition>
+      </div>
+    </Transition>
+  </Teleport>
+</template>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.pop-enter-active,
+.pop-leave-active {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.pop-enter-from,
+.pop-leave-to {
+  transform: translateY(12px) scale(0.98);
+  opacity: 0;
+}
+</style>

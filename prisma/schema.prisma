@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// All monetary values are stored as integer cents to avoid float/decimal
+// precision issues on SQLite. The UI divides by 100 for display.
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  segment   String // New, Returning, VIP, At-risk, Wholesale
+  location  String
+  note      String?
+  createdAt DateTime @default(now())
+  orders    Order[]
+}
+
+model Product {
+  id               Int         @id @default(autoincrement())
+  sku              String      @unique
+  name             String
+  category         String
+  priceCents       Int
+  costCents        Int
+  stock            Int
+  reorderThreshold Int
+  createdAt        DateTime    @default(now())
+  items            OrderItem[]
+  returns          Return[]
+}
+
+model Order {
+  id            Int         @id @default(autoincrement())
+  number        String      @unique // MCT-1001
+  customerId    Int
+  customer      Customer    @relation(fields: [customerId], references: [id])
+  channel       String // Web, Shopify, Amazon, Instagram, Wholesale
+  status        String // New, Paid, Fulfillment, Shipped, Returned, Cancelled
+  paymentStatus String // Pending, Paid, Refunded, Partially Refunded
+  placedAt      DateTime
+  slaDueAt      DateTime
+  shippedAt     DateTime?
+  subtotalCents Int
+  shippingCents Int
+  discountCents Int
+  totalCents    Int
+  priority      Boolean     @default(false)
+  note          String?
+  items         OrderItem[]
+  returns       Return[]
+}
+
+model OrderItem {
+  id             Int     @id @default(autoincrement())
+  orderId        Int
+  order          Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId      Int
+  product        Product @relation(fields: [productId], references: [id])
+  quantity       Int
+  unitPriceCents Int
+  lineTotalCents Int
+}
+
+model Return {
+  id          Int      @id @default(autoincrement())
+  orderId     Int
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   Int
+  product     Product  @relation(fields: [productId], references: [id])
+  reason      String // Damaged, Wrong item, Not as described, No longer needed, Late delivery, Quality
+  amountCents Int
+  status      String // Requested, Approved, Received, Refunded, Rejected
+  requestedAt DateTime
+}
