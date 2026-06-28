@@ -1,6 +1,9 @@
 <script setup lang="ts">
 const auth = useAuthStore()
-await navigateTo(auth.isAuthed ? '/dashboard' : '/login')
+const config = useRuntimeConfig()
+const demoAuthDisabled =
+  config.public.demoAuthDisabled === true || config.public.demoAuthDisabled === 'true'
+await navigateTo(demoAuthDisabled || auth.isAuthed ? '/dashboard' : '/login')
 </script>
 
 <template>

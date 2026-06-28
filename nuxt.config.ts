@@ -6,6 +6,11 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   components: [{ path: '~/components', pathPrefix: false }],
   pinia: { storesDirs: ['./stores/**'] },
+  runtimeConfig: {
+    public: {
+      demoAuthDisabled: process.env.DEMO_AUTH_DISABLED === 'true',
+    },
+  },
   app: {
     head: {
       title: 'Merchant Control Tower',

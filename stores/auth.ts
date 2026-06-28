@@ -14,7 +14,19 @@ export const useAuthStore = defineStore('auth', {
     isAuthed: (s) => !!s.token,
   },
   actions: {
+    demoAuthDisabled() {
+      const config = useRuntimeConfig()
+      return config.public.demoAuthDisabled === true || config.public.demoAuthDisabled === 'true'
+    },
+    useDemoSession() {
+      this.token = 'demo-session-token'
+      this.user = { email: 'demo@example.com', name: 'Demo Merchant' }
+    },
     init() {
+      if (this.demoAuthDisabled()) {
+        this.useDemoSession()
+        return
+      }
       if (!import.meta.client) return
       const raw = localStorage.getItem('mct-auth')
       if (!raw) return
@@ -36,6 +48,10 @@ export const useAuthStore = defineStore('auth', {
       if (import.meta.client) localStorage.setItem('mct-auth', JSON.stringify(res))
     },
     logout() {
+      if (this.demoAuthDisabled()) {
+        this.useDemoSession()
+        return
+      }
       this.token = null
       this.user = null
       if (import.meta.client) localStorage.removeItem('mct-auth')

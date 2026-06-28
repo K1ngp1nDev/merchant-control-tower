@@ -11,7 +11,7 @@ import type {
 
 export default defineEventHandler(async (event): Promise<BootstrapData> => {
   const auth = getHeader(event, 'authorization') ?? ''
-  if (!auth.startsWith('Bearer ')) {
+  if (process.env.DEMO_AUTH_DISABLED !== 'true' && !auth.startsWith('Bearer ')) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
 
